@@ -7,11 +7,8 @@ const Login = () => {
   const [password, setPassword] = useState('');
 
   const handleSignup = () => {
-    // You can add your signup logic here, like sending data to a server
     let key = "b22e0a6fd97e4306a63cf9db2c4cc4fc";
     let endpoint = "https://api.cognitive.microsofttranslator.com";
-    // location, also known as region.
-    // required if you're using a multi-service or regional (not global) resource. It can be found in the Azure portal on the Keys and Endpoint page.
     let location = "westus";
     
     axios({
