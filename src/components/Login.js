@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import axios from 'axios';
+import Constants from 'expo-constants';
+
 const { v4: uuidv4 } = require('uuid');
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSignup = () => {
-    let key = "b22e0a6fd97e4306a63cf9db2c4cc4fc";
+    let key = Constants.manifest.extra.apiKey;
     let endpoint = "https://api.cognitive.microsofttranslator.com";
     let location = "westus";
     
