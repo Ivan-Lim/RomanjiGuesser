@@ -1,64 +1,45 @@
 import axios from 'axios';
-import Constants from 'expo-constants';
-const { v4: uuidv4 } = require('uuid');
-export function useTransliterate() {
-    const endpoint = "https://api.cognitive.microsofttranslator.com";
-    const key = Constants.manifest.extra.apiKey;
-    const location = "westus";
+import { useAxiosConfig } from './useAxiosConfig';
 
+const { getAxiosConfig } = useAxiosConfig();
+export function useTransliterate() {
+
+    async function translate(text: string): Promise<string> {
+        const config = getAxiosConfig()
+        config.url = '/translate'
+        config.params = {
+            'api-version': '3.0',
+            'from': 'en',
+            'to': 'ja'
+        }
+        config.data = [{
+            'text': text,
+        }]
+        return await axios(config).then(response => {
+            return response.data[0].translations[0].text
+        })
+    }
     async function transliterate(text: string): Promise<string> {
-        return await axios({
-            baseURL: endpoint,
-            url: '/transliterate',
-            method: 'post',
-            headers: {
-                'Ocp-Apim-Subscription-Key': key,
-                'Ocp-Apim-Subscription-Region': location,
-                'Content-type': 'application/json',
-                'X-ClientTraceId': uuidv4().toString()
-            },
-            params: {
-                'api-version': '3.0',
-                'language': 'ja',
-                'fromScript': 'jpan',
-                'toScript': 'Latn'
-            },
-            data: [{
-                'text': text,
-                'script': 'jpan'
-            }],
-            responseType: 'json'
-        }).then(function(response){
+        const config = getAxiosConfig()
+        config.url ='/transliterate'
+        config.params = {
+            'api-version': '3.0',
+            'language': 'ja',
+            'fromScript': 'jpan',
+            'toScript': 'Latn'
+        }
+        config.data = [{
+            'text': text,
+            'script': 'jpan'
+        }]
+        return await axios(config).then(response => {
             return response.data[0].text
         })
     }
 
-    async function translate(text: string): Promise<string> {
-        return await axios({
-            baseURL: endpoint,
-            url: '/translate',
-            method: 'post',
-            headers: {
-                'Ocp-Apim-Subscription-Key': key,
-                'Ocp-Apim-Subscription-Region': location,
-                'Content-type': 'application/json',
-                'X-ClientTraceId': uuidv4().toString()
-            },
-            params: {
-                'api-version': '3.0',
-                'from': 'en',
-                'to': 'ja'
-            },
-            data: [{
-                'text': text,
-            }],
-            responseType: 'json'
-        }).then(function(response){
-            return response.data[0].translations[0].text
-        })
-    }
+
     return {
-        transliterate,
-        translate
+        translate,
+        transliterate
     };
 }
