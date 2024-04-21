@@ -1,31 +1,58 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Button } from 'react-native';
 import { useTransliterate } from '../api/useTransliterate';
 import styled from 'styled-components';
-const { translate, transliterate } = useTransliterate();
+import { words } from '../constants/words';
+const { translate, transliterate, synonyms } = useTransliterate();
 
 const Quiz = () => {
-	const [input, setInput] = useState('');
-	const [romanjiTranslation, setRomanjiTranslation] = useState('');
 
+	const [input, setInput] = useState('');
+	const [romanjiTranslations, setRomanjiTranslations] = useState([]);
+    const [correct, setCorrect] = useState(false);
+    const [word, setWord] = useState(words[Math.floor(Math.random() * words.length)])
+    const [showAnswer, setShowAnswer] = useState(false)
+    const capitalize = (text) => {
+        return text.charAt(0).toUpperCase() + word.slice(1);
+    }
 	const translateText = async () => {
-		const jpTranslation = await translate(input)
-		const enTranslation = await transliterate(jpTranslation)
-		setRomanjiTranslation(enTranslation)
+        const enSynonyms = await synonyms(word)
+		const jpTranslations = await translate([word, ...enSynonyms])
+		const enTranslation = await transliterate(jpTranslations)
+		setRomanjiTranslations(enTranslation)
 	}
+
+    const submitGuess = () => {
+        if(romanjiTranslations.includes(input.toLocaleLowerCase())){
+            setCorrect(true)
+        }
+    }
+    const nextWord = () => {
+        setCorrect(false)
+        setWord(words[Math.floor(Math.random() * words.length)])
+        setInput('')
+        setShowAnswer(false)
+    }
+
+    useEffect(() => {
+        translateText()
+    }, [word]);
+
 	return (
 		<View style={styles.container}>
-			<Text style={styles.title}>Romanization</Text>
+			<Text style={styles.title}>{capitalize(word)}</Text>
 			<TextInput
 				style={styles.input}
-				placeholder="Text"
 				onChangeText={setInput}
 				value={input}
 			/>
-			<StyledButton onClick={translateText}>Translate</StyledButton>
-			<p>
-				{romanjiTranslation}
-			</p>
+                <div className="button-row gap-8">
+                <StyledButton onClick={submitGuess}>Guess</StyledButton>
+                <StyledButton onClick={() => setShowAnswer(true)}>Show Answer</StyledButton>
+                <StyledButton onClick={nextWord}>Next</StyledButton>
+                </div>
+            {correct && <Text style={styles.title}>Correct!</Text>}
+            {showAnswer && <Text style={styles.title}>{romanjiTranslations.join(', ')}</Text>}
 		</View>
 	);
 };
@@ -45,7 +72,7 @@ const styles = StyleSheet.create({
 		width: '80%',
 		height: 40,
 		borderColor: 'black',
-        backgroundColor: 'rgba(255, 255, 255, 0.5)',
+        backgroundColor: 'rgba(255, 255, 255, 1)',
 		borderWidth: 1,
 		marginBottom: 20,
 		paddingHorizontal: 10,
@@ -64,7 +91,7 @@ const StyledButton = styled.button`
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.3s;
-
+  margin-right: 10px;
   &:hover {
     background-color: #45a049; /* Darker green */
   }

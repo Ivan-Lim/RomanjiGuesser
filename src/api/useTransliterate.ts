@@ -1,10 +1,10 @@
 import axios from 'axios';
 import { useAxiosConfig } from './useAxiosConfig';
-
+import Constants from 'expo-constants';
 const { getAxiosConfig } = useAxiosConfig();
 export function useTransliterate() {
 
-    async function translate(text: string): Promise<string> {
+    async function translate(words: Array<string>): Promise<Array<string>> {
         const config = getAxiosConfig()
         config.url = '/translate'
         config.params = {
@@ -12,14 +12,22 @@ export function useTransliterate() {
             'from': 'en',
             'to': 'ja'
         }
-        config.data = [{
-            'text': text,
-        }]
+        words.forEach(word => {
+            config.data.push({
+                'text': word,
+            })
+        });
         return await axios(config).then(response => {
-            return response.data[0].translations[0].text
+            let translations = [];
+            response.data.forEach(translation => {
+                translations.push(translation.translations[0].text)
+            })
+            return translations
+        }).catch(e => {
+            return [];
         })
     }
-    async function transliterate(text: string): Promise<string> {
+    async function transliterate(words: Array<string>): Promise<Array<string>> {
         const config = getAxiosConfig()
         config.url ='/transliterate'
         config.params = {
@@ -28,18 +36,40 @@ export function useTransliterate() {
             'fromScript': 'jpan',
             'toScript': 'Latn'
         }
-        config.data = [{
-            'text': text,
-            'script': 'jpan'
-        }]
+        words.forEach(word => {
+            config.data.push({
+                'text': word,
+                'script': 'jpan'
+            })
+        });
         return await axios(config).then(response => {
-            return response.data[0].text
+            let transliterations = [];
+            response.data.forEach(transliteration => {
+                transliterations.push(transliteration.text)
+            })
+            return transliterations
         })
     }
 
-
+    async function synonyms(text: string): Promise<Array<string>> {
+        const options = {
+            method: 'GET',
+            url: 'https://wordsapiv1.p.rapidapi.com/words/' + text + '/synonyms',
+            headers: {
+              'X-RapidAPI-Key': Constants.expoConfig.extra.wordsApiKey,
+              'X-RapidAPI-Host': 'wordsapiv1.p.rapidapi.com'
+            }
+          };
+          try {
+              const response = await axios.request(options);
+              return response.data.synonyms.slice(0, 10)
+          } catch (error) {
+              console.error(error);
+          }
+    }
     return {
         translate,
-        transliterate
+        transliterate,
+        synonyms
     };
 }

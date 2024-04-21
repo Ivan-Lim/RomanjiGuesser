@@ -3,7 +3,7 @@ import Constants from 'expo-constants';
 export function useAxiosConfig() {
 
     const endpoint = "https://api.cognitive.microsofttranslator.com";
-    const key = Constants.expoConfig.extra.apiKey;
+    const key = Constants.expoConfig.extra.azureApiKey;
     const location = "westus";
 
     function getAxiosConfig() {
@@ -18,7 +18,7 @@ export function useAxiosConfig() {
             },
             url: null,
             params: null,
-            data: null
+            data: []
         }
     }
     return {
