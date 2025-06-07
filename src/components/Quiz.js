@@ -47,9 +47,9 @@ const Quiz = () => {
 				value={input}
 			/>
                 <div className="button-row gap-8">
-                <StyledButton onClick={submitGuess}>Guess</StyledButton>
-                <StyledButton onClick={() => setShowAnswer(true)}>Show Answer</StyledButton>
-                <StyledButton onClick={nextWord}>Next</StyledButton>
+                    <StyledButton onClick={submitGuess}>Guess</StyledButton>
+                    <StyledButton onClick={() => setShowAnswer(true)}>Show Answer</StyledButton>
+                    <StyledButton onClick={nextWord}>Next</StyledButton>
                 </div>
             {correct && <Text style={styles.title}>Correct!</Text>}
             {showAnswer && <Text style={styles.title}>{romanjiTranslations.join(', ')}</Text>}
